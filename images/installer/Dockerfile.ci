@@ -6,11 +6,11 @@ WORKDIR /go/src/github.com/openshift/installer
 COPY . .
 RUN hack/build.sh && hack/get-terraform.sh
 
-FROM scratch
-COPY --from=build /go/src/github.com/openshift/installer/bin/openshift-install /bin/openshift-install
-COPY --from=build /go/src/github.com/openshift/installer/bin/terraform /bin/terraform
+FROM centos:7
+COPY --from=build /go/src/github.com/openshift/installer/bin/openshift-install /tmp/openshift-install
+COPY --from=build /go/src/github.com/openshift/installer/bin/terraform /tmp/terraform
 USER 1000:1000
-ENV PATH /bin
-ENV HOME /
-WORKDIR /
-ENTRYPOINT ["/bin/openshift-install"]
+ENV HOME /home/user
+ENV PATH $PATH:/home/user
+RUN mkdir /home/user && chmod 777 -R ${HOME} && cp /tmp/terraform /tmp/openshift-install ${HOME}
+WORKDIR /home/user
